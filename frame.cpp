@@ -17,8 +17,8 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QWidget>
 
-int n_contact = 1;
 QMap<int, Contact> contacts;
+int last_contact = 0;
 QPushButton *t_contact[6];
 
 Frame::Frame() : QWidget()
@@ -55,7 +55,7 @@ Frame::Frame() : QWidget()
     sizePolicy.setHeightForWidth(telephoner->sizePolicy().hasHeightForWidth());
     telephoner->setSizePolicy(sizePolicy);
     telephoner->setCursor(QCursor(Qt::PointingHandCursor));
-    QObject::connect(suivant, SIGNAL(clicked()), this, SLOT(getContacts()));
+    QObject::connect(suivant, SIGNAL(clicked()), this, SLOT(suivant()));
 
     query("SELECT * FROM contacts WHERE id <= 6");
     QMapIterator<int, Contact> i(contacts);
@@ -71,9 +71,7 @@ Frame::Frame() : QWidget()
 
     int n = 0;
     QMapIterator<int, Contact> i2(contacts);
-
     while (i2.hasNext() && n != 6) {
-        n++;
         i2.next();
         QIcon icon;
         t_contact[n] = new QPushButton(this);
@@ -81,8 +79,11 @@ Frame::Frame() : QWidget()
         icon.addFile(i2.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
         t_contact[n]->setIcon(icon);
         t_contact[n]->setIconSize(QSize(64,  64));
-        t_contact[n]->setGeometry(QRect(100 + n * 50, 100, 121, 51));
+        t_contact[n]->setGeometry(QRect(90 + n * 75, 100 + n * 10, 64, 64));
+        n++;
     }
+
+    last_contact = contacts.last().getId_contact();
 
 }
 
@@ -109,23 +110,36 @@ QString Frame::queryOne(QString command) {
     return out;
 }
 
-void Frame::getContacts() {
+void Frame::getContacts(int last) {
     query("SELECT * FROM contacts WHERE id > " + QString::number(contacts.last().getId_contact()));
 
     int n = 0;
+    int n2 = 0;
     QMapIterator<int, Contact> i2(contacts);
 
-    while (i2.hasNext() && n != 6) {
-        n++;
-        i2.next();
-        QIcon icon;
-        t_contact[n] = new QPushButton(this);
-        t_contact[n]->setFlat(true);
-        icon.addFile(i2.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
-        t_contact[n]->setIcon(icon);
-        t_contact[n]->setIconSize(QSize(64,  64));
-        t_contact[n]->setGeometry(QRect(100 + n * 50, 100, 121, 51));
+    while (n2 != (sizeof(t_contact) / sizeof(t_contact[0]))) {
+        t_contact[n2]->hide();
+        n2++;
     }
+
+    while (i2.hasNext()) {
+        i2.next();
+        if (i2.value().getId_contact() > last) {
+            QIcon icon;
+            t_contact[n] = new QPushButton(this);
+            t_contact[n]->setFlat(false);
+            icon.addFile(i2.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
+            t_contact[n]->setIcon(icon);
+            t_contact[n]->setIconSize(QSize(64,  64));
+            t_contact[n]->setGeometry(QRect(75, 75, 64, 64));
+            t_contact[n]->show();
+            n++;
+        }
+    }
+}
+
+void Frame::suivant() {
+    getContacts(last_contact);
 }
 
 void Frame::query(QString query) {
@@ -149,7 +163,6 @@ void Frame::query(QString query) {
                                                                                   res->getString("photo").asStdString(),
                                                                                   res->getString("telephone").asStdString(),
                                                                                   res->getString("frequence").asStdString()));
-        n_contact++;
     }
 
     delete stmt;

@@ -15,9 +15,10 @@ public:
     QString queryOne(QString command);
     void makeCall(QString number);
     void query(QString query);
+    void getContacts(int last);
     ~Frame();
 private slots:
-     void getContacts();
+    void suivant();
 private:
 
 };
