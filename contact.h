@@ -7,7 +7,7 @@
 class Contact
 {
 public:
-    Contact(int id_contact, std::string nom, std::string prenom, std::string photo, std::string telephone, std::string frequence);
+    Contact(int id_contact, std::string nom, std::string prenom, std::string photo, std::string telephone, int frequence);
 
     std::string getNom() const;
     void setNom(const std::string &value);
@@ -21,8 +21,8 @@ public:
     std::string getPhoto() const;
     void setPhoto(const std::string &value);
 
-    std::string getFrequence() const;
-    void setFrequence(const std::string &value);
+    int getFrequence() const;
+    void setFrequence(const int &value);
 
     int getId_contact() const;
 
@@ -32,7 +32,7 @@ private:
     std::string prenom;
     std::string telephone;
     std::string photo;
-    std::string frequence;
+    int frequence;
 
 signals:
 

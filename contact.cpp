@@ -1,6 +1,6 @@
 #include "contact.h"
 
-Contact::Contact(int id_contact, std::string nom, std::string prenom, std::string photo, std::string telephone, std::string frequence)
+Contact::Contact(int id_contact, std::string nom, std::string prenom, std::string photo, std::string telephone, int frequence)
 {
     this->id_contact = id_contact;
     this->nom = nom;
@@ -31,7 +31,7 @@ std::string Contact::getPhoto() const
     return photo;
 }
 
-std::string Contact::getFrequence() const
+int Contact::getFrequence() const
 {
     return frequence;
 }

@@ -13,3 +13,5 @@ SOURCES += \
 HEADERS += \
     contact.h \
     frame.h
+
+CONFIG += c++11
