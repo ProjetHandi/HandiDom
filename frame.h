@@ -12,13 +12,14 @@ class Frame : public QWidget
 
 public:
     Frame();
-    QString queryOne(QString command);
-    void makeCall(QString number);
     void query(QString query);
+    bool queryHasMore(int last);
     void getContacts(int last);
+    void closeEvent(QCloseEvent *event);
     ~Frame();
 private slots:
     void suivant();
+    void precedent();
 private:
 
 };
