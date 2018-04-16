@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QGridLayout>
+#include <QMapIterator>
 #include <contact.h>
 
 
@@ -15,10 +16,8 @@ public:
     void query(QString query);
     bool queryHasMore(int last);
     void updateContactsSuivant(int last);
-    void closeEvent(QCloseEvent *event);
     void getAllContacts();
-    void updateContactsPrecedent(int last);
-    ~Frame();
+    void updateContactsPrecedent();
 private slots:
     void suivant();
     void precedent();
