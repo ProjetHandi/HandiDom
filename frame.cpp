@@ -18,12 +18,12 @@
 #include <QtWidgets/QWidget>
 #include <QCloseEvent>
 #include <QMessageBox>
-#include <QGridLayout>
 #include <QLabel>
 
 QMap<int, Contact> contacts;
 unsigned last_contact = 0, n_contact = 0, page = 0, nbPage;
 QPushButton *t_contact[6];
+QLabel *l_contact[6];
 QPushButton *precedent_btn, *suivant_btn, *telephoner_btn;
 QLabel *page_lbl;
 
@@ -46,12 +46,12 @@ Frame::Frame() : QWidget()
     fleche2.addFile(QStringLiteral("img/ihm/f2.png"), QSize(), QIcon::Normal, QIcon::Off);
     tel.addFile(QStringLiteral("img/ihm/phone.png"), QSize(), QIcon::Normal, QIcon::Off);
     precedent_btn = new QPushButton(this);
-    layout->addWidget(precedent_btn, 2, 0);
+    layout->addWidget(precedent_btn, 4, 0);
     precedent_btn->setEnabled(false);
     telephoner_btn = new QPushButton(this);
-    layout->addWidget(telephoner_btn, 2, 1);
+    layout->addWidget(telephoner_btn, 4, 1);
     suivant_btn = new QPushButton(this);
-    layout->addWidget(suivant_btn, 2, 2);
+    layout->addWidget(suivant_btn, 4, 2);
     precedent_btn->setIcon(fleche1);
     precedent_btn->setIconSize(QSize(64, 64));
     precedent_btn->setFlat(true);
@@ -64,9 +64,10 @@ Frame::Frame() : QWidget()
     telephoner_btn->setIconSize(QSize(75, 75));
     telephoner_btn->setFlat(true);
     telephoner_btn->setCursor(QCursor(Qt::PointingHandCursor));
-    page_lbl = new QLabel(this);
-    page_lbl->setText("Page 1");
-    layout->addWidget(page_lbl, 3, 1);
+    telephoner_btn->setEnabled(false);
+    //page_lbl = new QLabel(this);
+    //page_lbl->setText("Page 1");
+    //layout->addWidget(page_lbl, 3, 1);
 
     QObject::connect(suivant_btn, SIGNAL(clicked()), this, SLOT(suivant()));
     QObject::connect(precedent_btn, SIGNAL(clicked()), this, SLOT(precedent()));
@@ -80,16 +81,22 @@ Frame::Frame() : QWidget()
     while (map_i.hasNext() && n != 6) {
         map_i.next();
         QIcon icon;
-        t_contact[n] = new QPushButton(this);
+        QString prenom = map_i.value().getPrenom().c_str();
+        QString nom = map_i.value().getNom().c_str();
+        l_contact[n] = new QLabel;
+        l_contact[n]->setText(prenom + "\n" + nom);
+        t_contact[n] = new QPushButton;
         t_contact[n]->setFlat(true);
         icon.addFile(map_i.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
         t_contact[n]->setIcon(icon);
-        t_contact[n]->setIconSize(QSize(100,  100));
+        t_contact[n]->setIconSize(QSize(140,  140));
         if (n <= 2) {
-            layout->addWidget(t_contact[n], 0, n);
+            layout->addWidget(t_contact[n], 0, n, Qt::AlignCenter);
+            layout->addWidget(l_contact[n], 1, n, Qt::AlignCenter);
         }
         else {
-            layout->addWidget(t_contact[n], 1, n - 3);
+            layout->addWidget(t_contact[n], 2, n - 3, Qt::AlignCenter);
+            layout->addWidget(l_contact[n], 3, n - 3, Qt::AlignCenter);
         }
         n++;
     }
@@ -100,13 +107,14 @@ Frame::Frame() : QWidget()
 }
 
 void Frame::updateContactsSuivant(int last) {
-        page++;
+    page++;
     QMapIterator<int, Contact> map_i(contacts);
 
     int n = 0;
     int n2 = 0;
 
     while (n2 != (sizeof(t_contact) / sizeof(t_contact[0]))) {
+        l_contact[n2]->hide();
         t_contact[n2]->hide();
         n2++;
     }
@@ -115,18 +123,25 @@ void Frame::updateContactsSuivant(int last) {
         map_i.next();
         if (map_i.value().getId_contact() > last) {
             QIcon icon;
-            t_contact[n] = new QPushButton(this);
+            QString prenom = map_i.value().getPrenom().c_str();
+            QString nom = map_i.value().getNom().c_str();
+            l_contact[n] = new QLabel;
+            l_contact[n]->setText(prenom + "\n" + nom);
+            t_contact[n] = new QPushButton;
             t_contact[n]->setFlat(true);
             icon.addFile(map_i.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
             t_contact[n]->setIcon(icon);
-            t_contact[n]->setIconSize(QSize(100,  100));
+            t_contact[n]->setIconSize(QSize(140,  140));
             if (n <= 2) {
-                layout->addWidget(t_contact[n], 0, n);
+                layout->addWidget(t_contact[n], 0, n, Qt::AlignCenter);
+                layout->addWidget(l_contact[n], 1, n, Qt::AlignCenter);
             }
             else {
-                layout->addWidget(t_contact[n], 1, n - 3);
+                layout->addWidget(t_contact[n], 2, n - 3, Qt::AlignCenter);
+                layout->addWidget(l_contact[n], 3, n - 3, Qt::AlignCenter);
             }
             t_contact[n]->show();
+            l_contact[n]->show();
             n++;
         }
 
@@ -136,7 +151,7 @@ void Frame::updateContactsSuivant(int last) {
     n_contact = n;
     last_contact += n;
 
-    page_lbl->setText("Page " + QString::number(page));
+    // page_lbl->setText("Page " + QString::number(page));
 
     if (!map_i.hasNext()) {
         suivant_btn->setEnabled(false);
@@ -148,14 +163,17 @@ void Frame::updateContactsSuivant(int last) {
 void Frame::updateContactsPrecedent() {
     QMapIterator<int, Contact> map_i(contacts);
     int n2 = 0;
+
     while (n2 != (sizeof(t_contact) / sizeof(t_contact[0]))) {
+        l_contact[n2]->hide();
         t_contact[n2]->hide();
         n2++;
     }
 
-    int n3 = 0;
+    int n = 0;
     map_i.toBack();
     int last_element = contacts.last().getId_contact();
+
     if (page - 1 == 1) {
         map_i.toFront();
     } else if (page < nbPage) {
@@ -177,34 +195,43 @@ void Frame::updateContactsPrecedent() {
             map_i.next();
         }
     }
+
     page--;
-    while (map_i.hasNext() && n3 != 6) {
+
+    while (map_i.hasNext() && n != 6) {
         map_i.next();
         QIcon icon;
-        t_contact[n3] = new QPushButton(this);
-        t_contact[n3]->setFlat(true);
+        QString prenom = map_i.value().getPrenom().c_str();
+        QString nom = map_i.value().getNom().c_str();
+        l_contact[n] = new QLabel;
+        l_contact[n]->setText(prenom + "\n" + nom);
+        t_contact[n] = new QPushButton;
+        t_contact[n]->setFlat(true);
         icon.addFile(map_i.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
-        t_contact[n3]->setIcon(icon);
-        t_contact[n3]->setIconSize(QSize(100,  100));
-        if (n3 <= 2) {
-            layout->addWidget(t_contact[n3], 0, n3);
+        t_contact[n]->setIcon(icon);
+        t_contact[n]->setIconSize(QSize(140,  140));
+        if (n <= 2) {
+            layout->addWidget(t_contact[n], 0, n, Qt::AlignCenter);
+            layout->addWidget(l_contact[n], 1, n, Qt::AlignCenter);
         }
         else {
-            layout->addWidget(t_contact[n3], 1, n3 - 3);
+            layout->addWidget(t_contact[n], 2, n - 3, Qt::AlignCenter);
+            layout->addWidget(l_contact[n], 3, n - 3, Qt::AlignCenter);
         }
-        t_contact[n3]->show();
-        n3++;
+        t_contact[n]->show();
+        l_contact[n]->show();
+        n++;
     }
 
-    if ((last_contact - n3) % 6 != 0) {
+    if ((last_contact - n) % 6 != 0) {
         last_contact -= n_contact;
     }
     else {
-        last_contact -= n3;
+        last_contact -= n;
     }
 
 
-    page_lbl->setText("Page " + QString::number(page));
+    // page_lbl->setText("Page " + QString::number(page));
     if (page == 1) {
         precedent_btn->setEnabled(false);
         this->setFocus();
@@ -223,7 +250,7 @@ void Frame::precedent() {
 }
 
 void Frame::telephoner() {
-    getAllContacts();
+    // getAllContacts();
 }
 
 void Frame::query(QString query) {
@@ -288,11 +315,11 @@ void Frame::getAllContacts() {
     while (i.hasNext()) {
         i.next();
         nbPage++;
-        /*qDebug() << i.value().getId_contact() << "|" << i.value().getNom().c_str() << "|" << i.value().getPrenom().c_str() << "|"
+        /* qDebug() << i.value().getId_contact() << "|" << i.value().getNom().c_str() << "|" << i.value().getPrenom().c_str() << "|"
                  << i.value().getPhoto().c_str() << "|" << i.value().getTelephone().c_str()
                  << "|" << i.value().getFrequence();*/
     }
     nbPage /= 6;
     nbPage++;
-    qDebug() << nbPage;
+    // qDebug() << nbPage;
 }
