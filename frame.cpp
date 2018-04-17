@@ -19,6 +19,7 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QLabel>
+#include "communication.h"
 
 QMap<int, Contact> contacts;
 unsigned last_contact = 0, n_contact = 0, page = 0, nbPage;
@@ -26,6 +27,7 @@ QPushButton *t_contact[6];
 QLabel *l_contact[6];
 QPushButton *precedent_btn, *suivant_btn, *telephoner_btn;
 QLabel *page_lbl;
+QString numTel[6];
 
 Frame::Frame() : QWidget()
 {
@@ -64,14 +66,13 @@ Frame::Frame() : QWidget()
     telephoner_btn->setIconSize(QSize(75, 75));
     telephoner_btn->setFlat(true);
     telephoner_btn->setCursor(QCursor(Qt::PointingHandCursor));
-    telephoner_btn->setEnabled(false);
+    telephoner_btn->setEnabled(true);
     //page_lbl = new QLabel(this);
     //page_lbl->setText("Page 1");
     //layout->addWidget(page_lbl, 3, 1);
 
     QObject::connect(suivant_btn, SIGNAL(clicked()), this, SLOT(suivant()));
     QObject::connect(precedent_btn, SIGNAL(clicked()), this, SLOT(precedent()));
-    QObject::connect(telephoner_btn, SIGNAL(clicked()), this, SLOT(telephoner()));
 
     query("SELECT * FROM contacts");
     getAllContacts();
@@ -84,8 +85,11 @@ Frame::Frame() : QWidget()
         QString prenom = map_i.value().getPrenom().c_str();
         QString nom = map_i.value().getNom().c_str();
         l_contact[n] = new QLabel;
+        numTel[n] = map_i.value().getTelephone().c_str();
         l_contact[n]->setText(prenom + "\n" + nom);
         t_contact[n] = new QPushButton;
+        t_contact[n]->setObjectName(QString::number(map_i.value().getId_contact()));
+        QObject::connect(t_contact[n], SIGNAL(clicked()), this, SLOT(telephoner()));
         t_contact[n]->setFlat(true);
         icon.addFile(map_i.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
         t_contact[n]->setIcon(icon);
@@ -130,8 +134,11 @@ void Frame::updateContactsSuivant(int last) {
             QString prenom = map_i.value().getPrenom().c_str();
             QString nom = map_i.value().getNom().c_str();
             l_contact[n] = new QLabel;
+            numTel[n] = map_i.value().getTelephone().c_str();
             l_contact[n]->setText(prenom + "\n" + nom);
             t_contact[n] = new QPushButton;
+            t_contact[n]->setObjectName(QString::number(map_i.value().getId_contact()));
+            QObject::connect(t_contact[n], SIGNAL(clicked()), this, SLOT(telephoner()));
             t_contact[n]->setFlat(true);
             icon.addFile(map_i.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
             t_contact[n]->setIcon(icon);
@@ -141,7 +148,6 @@ void Frame::updateContactsSuivant(int last) {
                 layout->addWidget(l_contact[n], 1, n, Qt::AlignCenter);
             }
             else {
-                qDebug() << "lol";
                 layout->addWidget(t_contact[n], 2, n - 3, Qt::AlignCenter);
                 layout->addWidget(l_contact[n], 3, n - 3, Qt::AlignCenter);
             }
@@ -209,8 +215,11 @@ void Frame::updateContactsPrecedent() {
         QString prenom = map_i.value().getPrenom().c_str();
         QString nom = map_i.value().getNom().c_str();
         l_contact[n] = new QLabel;
+        numTel[n] = map_i.value().getTelephone().c_str();
         l_contact[n]->setText(prenom + "\n" + nom);
         t_contact[n] = new QPushButton;
+        t_contact[n]->setObjectName(QString::number(map_i.value().getId_contact()));
+        QObject::connect(t_contact[n], SIGNAL(clicked()), this, SLOT(telephoner()));
         t_contact[n]->setFlat(true);
         icon.addFile(map_i.value().getPhoto().c_str(), QSize(), QIcon::Normal, QIcon::Off);
         t_contact[n]->setIcon(icon);
@@ -255,7 +264,13 @@ void Frame::precedent() {
 }
 
 void Frame::telephoner() {
-    // getAllContacts();
+    COM c;
+    QObject* b = QObject::sender();
+    int index = b->objectName().toInt();
+    if (index > 6)
+        index -= (page - 1) * 6;
+    qDebug() << numTel[index - 1];
+    // c.call(numTel[index]);
 }
 
 void Frame::query(QString query) {
