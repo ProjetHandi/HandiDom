@@ -100,6 +100,10 @@ Frame::Frame() : QWidget()
         }
         n++;
     }
+
+    if (!map_i.hasNext()) {
+        suivant_btn->setEnabled(false);
+    }
     page++;
     this->setLayout(layout);
     last_contact = n;
@@ -137,6 +141,7 @@ void Frame::updateContactsSuivant(int last) {
                 layout->addWidget(l_contact[n], 1, n, Qt::AlignCenter);
             }
             else {
+                qDebug() << "lol";
                 layout->addWidget(t_contact[n], 2, n - 3, Qt::AlignCenter);
                 layout->addWidget(l_contact[n], 3, n - 3, Qt::AlignCenter);
             }
