@@ -1,12 +1,7 @@
 #include <QApplication>
 #include <QPushButton>
-#include <mysql_driver.h>
 #include <QStyle>
 #include <QDesktopWidget>
-#include <mysql_connection.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
-#include <cppconn/prepared_statement.h>
 #include <QProcess>
 #include <contact.h>
 #include <string>
@@ -19,6 +14,8 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QLabel>
+#include <QtSql>
+#include <QtSql/QSqlQuery>
 #include "communication.h"
 
 QMap<int, Contact> contacts;
@@ -37,10 +34,11 @@ Frame::Frame() : QWidget()
     sizePolicy.setVerticalStretch(0);
     sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
     this->setSizePolicy(sizePolicy);
+    this->setCursor(Qt::BlankCursor);
     this->setMinimumSize(QSize(400, 300));
     this->setWindowTitle("HandiDom");
     QIcon icon;
-    icon.addFile(QStringLiteral(":/img/ihm/icon.png"), QSize(), QIcon::Normal, QIcon::Off);
+    //icon.addFile(QStringLiteral(":/img/ihm/icon.png"), QSize(), QIcon::Normal, QIcon::Off);
     this->setWindowIcon(icon);
 
     QIcon fleche1, fleche2, tel;
@@ -270,64 +268,29 @@ void Frame::telephoner() {
     if (index > 6)
         index -= (page - 1) * 6;
     qDebug() << numTel[index - 1];
-    // c.call(numTel[index]);
+    c.call(numTel[index]);
 }
 
 void Frame::query(QString query) {
-    sql::Driver *driver;
-    sql::Connection *con;
-    sql::PreparedStatement *prep_stmt;
-    sql::ResultSet *res;
-    sql::Statement *stmt;
-
-    driver = get_driver_instance();
-    con = driver->connect("127.0.0.1", "root", "btsir123");
-    stmt = con->createStatement();
-    stmt->execute("USE HandiDom");
-
-    prep_stmt = con->prepareStatement(query.toStdString());
-    res = prep_stmt->executeQuery();
-
-    while(res->next()) {
-        contacts.insert(res->getInt("id"), Contact(res->getInt("id"),
-                                                   res->getString("nom").asStdString(),
-                                                   res->getString("prenom").asStdString(),
-                                                   res->getString("photo").asStdString(),
-                                                   res->getString("telephone").asStdString(),
-                                                   res->getInt("frequence")));
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL3");
+    db.setHostName("localhost");
+    db.setUserName("root");
+    db.setPassword("btsir123");
+    db.setDatabaseName("HandiDom");
+    bool ok = db.open();
+    QSqlQuery q;
+    q.exec(query);
+    if(ok)
+    while(q.next()) {
+        contacts.insert(q.value("id").toInt(), Contact(q.value("id").toInt(),
+                                                   q.value("nom").toString().toStdString(),
+                                                   q.value("prenom").toString().toStdString(),
+                                                   q.value("photo").toString().toStdString(),
+                                                   q.value("telephone").toString().toStdString(),
+                                                   q.value("frequence").toInt()));
     }
-
-    delete stmt;
-    delete con;
-    delete res;
-}
-
-bool Frame::queryHasMore(int last) {
-    sql::Driver *driver;
-    sql::Connection *con;
-    sql::PreparedStatement *prep_stmt;
-    sql::ResultSet *res;
-    sql::Statement *stmt;
-
-    driver = get_driver_instance();
-    con = driver->connect("127.0.0.1", "root", "btsir123");
-    stmt = con->createStatement();
-    stmt->execute("USE HandiDom");
-
-    prep_stmt = con->prepareStatement("SELECT * FROM contacts WHERE id > " + QString::number(last).toStdString() + " HAVING id IS NOT NULL");
-    res = prep_stmt->executeQuery();
-
-    if(!res->next()) {
-        delete stmt;
-        delete con;
-        delete res;
-        return false;
-    }
-
-    delete stmt;
-    delete con;
-    delete res;
-    return true;
+    else
+        qDebug() << "lol";
 }
 
 void Frame::getAllContacts() {

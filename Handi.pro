@@ -1,10 +1,7 @@
 QT += \
     widgets \
-    serialport
-
-DISTFILES +=
-
-unix|win32: LIBS += -lmysqlcppconn
+    serialport \
+    sql
 
 SOURCES += \
     frame.cpp \
@@ -18,3 +15,7 @@ HEADERS += \
     communication.h
 
 CONFIG += c++11
+
+INSTALLS        = target
+target.files    = Phone
+target.path     = /home/pi/phone

@@ -14,7 +14,6 @@ class Frame : public QWidget
 public:
     Frame();
     void query(QString query);
-    bool queryHasMore(int last);
     void updateContactsSuivant(int last);
     void getAllContacts();
     void updateContactsPrecedent();
