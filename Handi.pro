@@ -18,4 +18,4 @@ CONFIG += c++11
 
 INSTALLS        = target
 target.files    = Phone
-target.path     = /home/pi/phone
+target.path     = /home/pi/handi

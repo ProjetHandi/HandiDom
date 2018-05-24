@@ -9,6 +9,7 @@ public:
     COM();
     void setUpPIN();
     void call(QString number);
+    void hangup();
 };
 
 #endif // COMMUNICATION_H
