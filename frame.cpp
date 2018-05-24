@@ -37,9 +37,6 @@ Frame::Frame() : QWidget()
     this->setCursor(Qt::BlankCursor);
     this->setMinimumSize(QSize(400, 300));
     this->setWindowTitle("HandiDom");
-    QIcon icon;
-    //icon.addFile(QStringLiteral(":/img/ihm/icon.png"), QSize(), QIcon::Normal, QIcon::Off);
-    this->setWindowIcon(icon);
 
     QIcon fleche1, fleche2, tel;
     fleche1.addFile(QStringLiteral("img/ihm/f.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -50,6 +47,7 @@ Frame::Frame() : QWidget()
     precedent_btn->setEnabled(false);
     telephoner_btn = new QPushButton(this);
     layout->addWidget(telephoner_btn, 4, 1);
+    telephoner_btn->setEnabled(false);
     suivant_btn = new QPushButton(this);
     layout->addWidget(suivant_btn, 4, 2);
     precedent_btn->setIcon(fleche1);
@@ -63,17 +61,16 @@ Frame::Frame() : QWidget()
     telephoner_btn->setIcon(tel);
     telephoner_btn->setIconSize(QSize(75, 75));
     telephoner_btn->setFlat(true);
-    telephoner_btn->setCursor(QCursor(Qt::PointingHandCursor));
-    telephoner_btn->setEnabled(true);
-    //page_lbl = new QLabel(this);
-    //page_lbl->setText("Page 1");
-    //layout->addWidget(page_lbl, 3, 1);
+    // telephoner_btn->setCursor(QCursor(Qt::PointingHandCursor));
 
     QObject::connect(suivant_btn, SIGNAL(clicked()), this, SLOT(suivant()));
     QObject::connect(precedent_btn, SIGNAL(clicked()), this, SLOT(precedent()));
+    QObject::connect(telephoner_btn, SIGNAL(clicked()), this, SLOT(raccrocher()));
 
     query("SELECT * FROM contacts");
     getAllContacts();
+    COM c;
+    c.setUpPIN();
 
     QMapIterator<int, Contact> map_i(contacts);
     int n = 0;
@@ -159,8 +156,6 @@ void Frame::updateContactsSuivant(int last) {
     this->setLayout(layout);
     n_contact = n;
     last_contact += n;
-
-    // page_lbl->setText("Page " + QString::number(page));
 
     if (!map_i.hasNext()) {
         suivant_btn->setEnabled(false);
@@ -268,7 +263,14 @@ void Frame::telephoner() {
     if (index > 6)
         index -= (page - 1) * 6;
     qDebug() << numTel[index - 1];
-    c.call(numTel[index]);
+    c.call(numTel[index - 1]);
+    telephoner_btn->setEnabled(true);
+}
+
+void Frame::raccrocher() {
+    COM c;
+    c.hangup();
+    telephoner_btn->setEnabled(false);
 }
 
 void Frame::query(QString query) {
@@ -280,6 +282,7 @@ void Frame::query(QString query) {
     bool ok = db.open();
     QSqlQuery q;
     q.exec(query);
+
     if(ok)
     while(q.next()) {
         contacts.insert(q.value("id").toInt(), Contact(q.value("id").toInt(),
@@ -290,7 +293,7 @@ void Frame::query(QString query) {
                                                    q.value("frequence").toInt()));
     }
     else
-        qDebug() << "lol";
+        qDebug() << "Erreur de connexion";
 }
 
 void Frame::getAllContacts() {
@@ -298,11 +301,12 @@ void Frame::getAllContacts() {
     while (i.hasNext()) {
         i.next();
         nbPage++;
-        /* qDebug() << i.value().getId_contact() << "|" << i.value().getNom().c_str() << "|" << i.value().getPrenom().c_str() << "|"
+        /* qDebug() << i.value().getId_contact() << "|" << i.value().getNom().c_str() << "|"
+                 << i.value().getPrenom().c_str() << "|"
                  << i.value().getPhoto().c_str() << "|" << i.value().getTelephone().c_str()
-                 << "|" << i.value().getFrequence();*/
+                 << "|" << i.value().getFrequence(); */
     }
     nbPage /= 6;
     nbPage++;
-    // qDebug() << nbPage;
+    qDebug() << nbPage;
 }

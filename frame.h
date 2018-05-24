@@ -21,6 +21,7 @@ private slots:
     void suivant();
     void precedent();
     void telephoner();
+    void raccrocher();
 private:
     QGridLayout *layout = new QGridLayout;
 };

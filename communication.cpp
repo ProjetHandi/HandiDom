@@ -11,7 +11,7 @@ COM::COM() {
 }
 
 void COM::setUpPIN() {
-    serial.setPortName("/dev/ttyUSB0");
+    serial.setPortName("/dev/ttyS0");
     serial.open(QIODevice::ReadWrite);
     serial.setBaudRate(QSerialPort::Baud115200);
     QByteArray output, input, input2;
@@ -25,7 +25,7 @@ void COM::setUpPIN() {
         input = serial.readAll();
         serial.waitForReadyRead(2000);
         input2 = serial.readAll();
-        qDebug() << input2;
+        qDebug() << input << " - " << input2;
 
         serial.close();
     }
@@ -35,7 +35,7 @@ void COM::setUpPIN() {
 }
 
 void COM::call(QString number) {
-    serial.setPortName("/dev/ttyUSB0");
+    serial.setPortName("/dev/ttyS0");
     serial.open(QIODevice::ReadWrite);
     serial.setBaudRate(QSerialPort::Baud115200);
     QByteArray output, input, input2;
@@ -44,13 +44,23 @@ void COM::call(QString number) {
         output = "ATD" + number.toLocal8Bit() + ";\r\n";
         serial.write(output);
         serial.flush();
+        serial.close();
+    }
+    else {
+        qDebug() << serial.errorString();
+    }
+}
 
-        serial.waitForReadyRead(2000);
-        input = serial.readAll();
-        serial.waitForReadyRead(2000);
-        input2 = serial.readAll();
-        qDebug() << input2;
+void COM::hangup() {
+    serial.setPortName("/dev/ttyS0");
+    serial.open(QIODevice::ReadWrite);
+    serial.setBaudRate(QSerialPort::Baud115200);
+    QByteArray output, input, input2;
 
+    if (serial.isOpen() && serial.isWritable()) {
+        output = "ATH;\r\n";
+        serial.write(output);
+        serial.flush();
         serial.close();
     }
     else {
