@@ -34,7 +34,7 @@ Frame::Frame() : QWidget()
     sizePolicy.setVerticalStretch(0);
     sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
     this->setSizePolicy(sizePolicy);
-    this->setCursor(Qt::BlankCursor);
+    // this->setCursor(Qt::BlankCursor);
     this->setMinimumSize(QSize(400, 300));
     this->setWindowTitle("HandiDom");
 
@@ -67,11 +67,8 @@ Frame::Frame() : QWidget()
     QObject::connect(precedent_btn, SIGNAL(clicked()), this, SLOT(precedent()));
     QObject::connect(telephoner_btn, SIGNAL(clicked()), this, SLOT(raccrocher()));
 
-    query("SELECT * FROM contacts");
+    query("SELECT * FROM phone WHERE id_user = 1");
     getAllContacts();
-    COM c;
-    c.setUpPIN();
-
     QMapIterator<int, Contact> map_i(contacts);
     int n = 0;
     while (map_i.hasNext() && n != 6) {

@@ -7,12 +7,16 @@ SOURCES += \
     frame.cpp \
     contact.cpp \
     main.cpp \
-    communication.cpp
+    communication.cpp \
+    user.cpp \
+    userframe.cpp
 
 HEADERS += \
     contact.h \
     frame.h \
-    communication.h
+    communication.h \
+    user.h \
+    userframe.h
 
 CONFIG += c++11
 
