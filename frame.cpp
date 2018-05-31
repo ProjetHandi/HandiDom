@@ -305,5 +305,4 @@ void Frame::getAllContacts() {
     }
     nbPage /= 6;
     nbPage++;
-    qDebug() << nbPage;
 }

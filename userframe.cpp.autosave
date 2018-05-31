@@ -263,5 +263,4 @@ void UserFrame::getAllUser() {
     }
     nbPage_u /= 6;
     nbPage_u++;
-    qDebug() << nbPage_u;
 }

@@ -2,22 +2,27 @@
 #include <QObject>
 #include <QString>
 
-User::User(int id, QString prenom, QString nom)
+User::User(int id, QString prenom, QString nom, QString photo)
 {
     this->id = id;
     this->prenom = prenom;
     this->nom = nom;
+    this->photo = photo;
 }
 
-User::getId() const {
+int User::getId() const {
     return id;
 }
 
-User::getPrenom() const {
+QString User::getPrenom() const {
     return prenom;
 }
 
-User::getNom() const {
+QString User::getNom() const {
     return nom;
+}
+
+QString User::getPhoto() const {
+    return photo;
 }
 

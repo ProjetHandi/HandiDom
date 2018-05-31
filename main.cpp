@@ -2,6 +2,7 @@
 #include <QStyle>
 #include <QDesktopWidget>
 #include "frame.h"
+#include "userframe.h"
 #include "communication.h"
 #include <QDebug>
 
@@ -13,7 +14,7 @@ int main(int argc, char *argv[])
     COM communication;
     communication.setUpPIN();
 
-    Frame fenetre;
+    UserFrame fenetre;
     fenetre.show();
     fenetre.setGeometry(
                 QStyle::alignedRect(
