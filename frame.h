@@ -17,6 +17,7 @@ public:
     void updateContactsSuivant(int last);
     void getAllContacts();
     void updateContactsPrecedent();
+    void setUserId(int user);
 private slots:
     void suivant();
     void precedent();

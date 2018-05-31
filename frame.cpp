@@ -25,6 +25,7 @@ QLabel *l_contact[6];
 QPushButton *precedent_btn, *suivant_btn, *telephoner_btn;
 QLabel *page_lbl;
 QString numTel[6];
+int userid;
 
 Frame::Frame() : QWidget()
 {
@@ -67,7 +68,9 @@ Frame::Frame() : QWidget()
     QObject::connect(precedent_btn, SIGNAL(clicked()), this, SLOT(precedent()));
     QObject::connect(telephoner_btn, SIGNAL(clicked()), this, SLOT(raccrocher()));
 
-    query("SELECT * FROM phone WHERE id_user = 1");
+    qDebug() << "SELECT * FROM phone WHERE id_user = " + QString::number(userid) << "|" << userid;
+
+    query("SELECT * FROM phone WHERE id_user = " + QString::number(userid));
     getAllContacts();
     QMapIterator<int, Contact> map_i(contacts);
     int n = 0;
@@ -104,6 +107,10 @@ Frame::Frame() : QWidget()
     this->setLayout(layout);
     last_contact = n;
     this->setFocus();
+}
+
+void Frame::setUserId(int user) {
+    userid = user;
 }
 
 void Frame::updateContactsSuivant(int last) {
@@ -286,7 +293,7 @@ void Frame::query(QString query) {
                                                    q.value("nom").toString().toStdString(),
                                                    q.value("prenom").toString().toStdString(),
                                                    q.value("photo").toString().toStdString(),
-                                                   q.value("telephone").toString().toStdString(),
+                                                   q.value("numero").toString().toStdString(),
                                                    q.value("frequence").toInt()));
     }
     else

@@ -13,6 +13,7 @@
 #include <QtWidgets/QWidget>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <frame.h>
 #include <QLabel>
 #include <QtSql>
 #include <QtSql/QSqlQuery>
@@ -69,6 +70,7 @@ UserFrame::UserFrame() : QWidget()
         l_user[n]->setText(prenom + "\n" + nom);
         t_user[n] = new QPushButton;
         t_user[n]->setObjectName(QString::number(map_i.value().getId()));
+        QObject::connect(t_user[n], SIGNAL(clicked()), this, SLOT(open_contacts()));
         t_user[n]->setFlat(true);
         icon.addFile(map_i.value().getPhoto(), QSize(), QIcon::Normal, QIcon::Off);
         t_user[n]->setIcon(icon);
@@ -91,6 +93,25 @@ UserFrame::UserFrame() : QWidget()
     this->setLayout(layout);
     last_user = n;
     this->setFocus();
+}
+
+void UserFrame::open_contacts() {
+    QObject* b = QObject::sender();
+    int user = b->objectName().toInt();
+    qDebug() << user;
+    this->hide();
+    Frame f;
+    f.setUserId(user);
+    Frame* fenetre = new Frame;
+    fenetre->show();
+    fenetre->setGeometry(
+                QStyle::alignedRect(
+                    Qt::LeftToRight,
+                    Qt::AlignCenter,
+                    fenetre->size(),
+                    qApp->desktop()->availableGeometry()
+                    )
+                );
 }
 
 void UserFrame::updateUserSuivant(int last) {
@@ -116,6 +137,7 @@ void UserFrame::updateUserSuivant(int last) {
             l_user[n]->setText(prenom + "\n" + nom);
             t_user[n] = new QPushButton;
             t_user[n]->setObjectName(QString::number(map_i.value().getId()));
+            QObject::connect(t_user[n], SIGNAL(clicked()), this, SLOT(open_contacts()));
             t_user[n]->setFlat(true);
             icon.addFile(map_i.value().getPhoto(), QSize(), QIcon::Normal, QIcon::Off);
             t_user[n]->setIcon(icon);
@@ -193,6 +215,7 @@ void UserFrame::updateUserPrecedent() {
         l_user[n]->setText(prenom + "\n" + nom);
         t_user[n] = new QPushButton;
         t_user[n]->setObjectName(QString::number(map_i.value().getId()));
+        QObject::connect(t_user[n], SIGNAL(clicked()), this, SLOT(open_contacts()));
         t_user[n]->setFlat(true);
         icon.addFile(map_i.value().getPhoto(), QSize(), QIcon::Normal, QIcon::Off);
         t_user[n]->setIcon(icon);
@@ -263,5 +286,4 @@ void UserFrame::getAllUser() {
     }
     nbPage_u /= 6;
     nbPage_u++;
-    qDebug() << nbPage_u;
 }

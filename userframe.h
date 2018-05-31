@@ -19,6 +19,7 @@ public:
 private slots:
     void suivant();
     void precedent();
+    void open_contacts();
 private:
     QGridLayout *layout = new QGridLayout;
 };
