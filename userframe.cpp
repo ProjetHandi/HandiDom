@@ -47,11 +47,11 @@ UserFrame::UserFrame() : QWidget()
     precedent_btn_u->setIcon(fleche1);
     precedent_btn_u->setIconSize(QSize(64, 64));
     precedent_btn_u->setFlat(true);
-    precedent_btn_u->setGeometry(QRect(10, 100, 61, 81));
     suivant_btn_u->setIcon(fleche2);
     suivant_btn_u->setIconSize(QSize(64, 64));
     suivant_btn_u->setFlat(true);
-    suivant_btn_u->setGeometry(QRect(530, 100, 61, 81));
+    QLabel* menu = new QLabel("Choisissez un utilisateur", this);
+    layout->addWidget(menu, 4, 1, Qt::AlignCenter);
 
     QObject::connect(suivant_btn_u, SIGNAL(clicked()), this, SLOT(suivant()));
     QObject::connect(precedent_btn_u, SIGNAL(clicked()), this, SLOT(precedent()));
@@ -61,6 +61,7 @@ UserFrame::UserFrame() : QWidget()
 
     QMapIterator<int, User> map_i(user);
     int n = 0;
+
     while (map_i.hasNext() && n != 6) {
         map_i.next();
         QIcon icon;
@@ -87,7 +88,7 @@ UserFrame::UserFrame() : QWidget()
     }
 
     if (!map_i.hasNext()) {
-        suivant_btn_u->setEnabled(true);
+        suivant_btn_u->setEnabled(false);
     }
     page_u++;
     this->setLayout(layout);
