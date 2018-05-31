@@ -11,8 +11,8 @@ QT_USE_NAMESPACE
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    COM communication;
-    communication.setUpPIN();
+    // COM communication;
+    // communication.setUpPIN();
 
     UserFrame fenetre;
     fenetre.show();
@@ -24,7 +24,6 @@ int main(int argc, char *argv[])
                     qApp->desktop()->availableGeometry()
                     )
                 );
-
 
     return app.exec();
 }

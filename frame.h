@@ -12,18 +12,18 @@ class Frame : public QWidget
    Q_OBJECT
 
 public:
-    Frame();
+    Frame(int user);
     void query(QString query);
     void updateContactsSuivant(int last);
     void getAllContacts();
     void updateContactsPrecedent();
-    void setUserId(int user);
 private slots:
     void suivant();
     void precedent();
     void telephoner();
-    void raccrocher();
+    void menu();
 private:
+    int userid;
     QGridLayout *layout = new QGridLayout;
 };
 

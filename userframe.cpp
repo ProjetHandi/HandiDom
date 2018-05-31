@@ -87,7 +87,7 @@ UserFrame::UserFrame() : QWidget()
     }
 
     if (!map_i.hasNext()) {
-        suivant_btn_u->setEnabled(false);
+        suivant_btn_u->setEnabled(true);
     }
     page_u++;
     this->setLayout(layout);
@@ -98,11 +98,8 @@ UserFrame::UserFrame() : QWidget()
 void UserFrame::open_contacts() {
     QObject* b = QObject::sender();
     int user = b->objectName().toInt();
-    qDebug() << user;
     this->hide();
-    Frame f;
-    f.setUserId(user);
-    Frame* fenetre = new Frame;
+    Frame* fenetre = new Frame(user);
     fenetre->show();
     fenetre->setGeometry(
                 QStyle::alignedRect(
@@ -258,6 +255,7 @@ void UserFrame::precedent() {
 }
 
 void UserFrame::query(QString query) {
+    {
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL3");
     db.setHostName("localhost");
     db.setUserName("root");
@@ -276,6 +274,9 @@ void UserFrame::query(QString query) {
     }
     else
         qDebug() << "Erreur de connexion";
+    db.close();
+    }
+    QSqlDatabase::removeDatabase("qt_sql_default_connection");
 }
 
 void UserFrame::getAllUser() {

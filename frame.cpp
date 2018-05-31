@@ -17,18 +17,19 @@
 #include <QtSql>
 #include <QtSql/QSqlQuery>
 #include "communication.h"
+#include "userframe.h"
 
 QMap<int, Contact> contacts;
 unsigned last_contact = 0, n_contact = 0, page = 0, nbPage;
 QPushButton *t_contact[6];
 QLabel *l_contact[6];
-QPushButton *precedent_btn, *suivant_btn, *telephoner_btn;
+QPushButton *precedent_btn, *suivant_btn, *menu_btn;
 QLabel *page_lbl;
 QString numTel[6];
-int userid;
 
-Frame::Frame() : QWidget()
+Frame::Frame(int user) : QWidget()
 {
+    this->userid = user;
     this->resize(800, 500);
     QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
@@ -39,16 +40,15 @@ Frame::Frame() : QWidget()
     this->setMinimumSize(QSize(400, 300));
     this->setWindowTitle("HandiDom");
 
-    QIcon fleche1, fleche2, tel;
+    QIcon fleche1, fleche2, menu;
     fleche1.addFile(QStringLiteral("img/ihm/f.png"), QSize(), QIcon::Normal, QIcon::Off);
     fleche2.addFile(QStringLiteral("img/ihm/f2.png"), QSize(), QIcon::Normal, QIcon::Off);
-    tel.addFile(QStringLiteral("img/ihm/phone.png"), QSize(), QIcon::Normal, QIcon::Off);
+    menu.addFile(QStringLiteral("img/ihm/menu.png"), QSize(), QIcon::Normal, QIcon::Off);
     precedent_btn = new QPushButton(this);
     layout->addWidget(precedent_btn, 4, 0);
     precedent_btn->setEnabled(false);
-    telephoner_btn = new QPushButton(this);
-    layout->addWidget(telephoner_btn, 4, 1);
-    telephoner_btn->setEnabled(false);
+    menu_btn = new QPushButton(this);
+    layout->addWidget(menu_btn, 4, 1);
     suivant_btn = new QPushButton(this);
     layout->addWidget(suivant_btn, 4, 2);
     precedent_btn->setIcon(fleche1);
@@ -59,19 +59,17 @@ Frame::Frame() : QWidget()
     suivant_btn->setIconSize(QSize(64, 64));
     suivant_btn->setFlat(true);
     suivant_btn->setGeometry(QRect(530, 100, 61, 81));
-    telephoner_btn->setIcon(tel);
-    telephoner_btn->setIconSize(QSize(75, 75));
-    telephoner_btn->setFlat(true);
-    // telephoner_btn->setCursor(QCursor(Qt::PointingHandCursor));
+    menu_btn->setIcon(menu);
+    menu_btn->setIconSize(QSize(200, 100));
+    menu_btn->setFlat(true);
 
     QObject::connect(suivant_btn, SIGNAL(clicked()), this, SLOT(suivant()));
     QObject::connect(precedent_btn, SIGNAL(clicked()), this, SLOT(precedent()));
-    QObject::connect(telephoner_btn, SIGNAL(clicked()), this, SLOT(raccrocher()));
-
-    qDebug() << "SELECT * FROM phone WHERE id_user = " + QString::number(userid) << "|" << userid;
+    QObject::connect(menu_btn, SIGNAL(clicked()), this, SLOT(menu()));
 
     query("SELECT * FROM phone WHERE id_user = " + QString::number(userid));
     getAllContacts();
+
     QMapIterator<int, Contact> map_i(contacts);
     int n = 0;
     while (map_i.hasNext() && n != 6) {
@@ -107,10 +105,6 @@ Frame::Frame() : QWidget()
     this->setLayout(layout);
     last_contact = n;
     this->setFocus();
-}
-
-void Frame::setUserId(int user) {
-    userid = user;
 }
 
 void Frame::updateContactsSuivant(int last) {
@@ -241,8 +235,6 @@ void Frame::updateContactsPrecedent() {
         last_contact -= n;
     }
 
-
-    // page_lbl->setText("Page " + QString::number(page));
     if (page == 1) {
         precedent_btn->setEnabled(false);
         this->setFocus();
@@ -268,16 +260,25 @@ void Frame::telephoner() {
         index -= (page - 1) * 6;
     qDebug() << numTel[index - 1];
     c.call(numTel[index - 1]);
-    telephoner_btn->setEnabled(true);
+    menu_btn->setEnabled(true);
 }
 
-void Frame::raccrocher() {
-    COM c;
-    c.hangup();
-    telephoner_btn->setEnabled(false);
+void Frame::menu() {
+    this->hide();
+    UserFrame* fenetre = new UserFrame();
+    fenetre->show();
+    fenetre->setGeometry(
+                QStyle::alignedRect(
+                    Qt::LeftToRight,
+                    Qt::AlignCenter,
+                    fenetre->size(),
+                    qApp->desktop()->availableGeometry()
+                    )
+                );
 }
 
 void Frame::query(QString query) {
+    {
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL3");
     db.setHostName("localhost");
     db.setUserName("root");
@@ -298,6 +299,9 @@ void Frame::query(QString query) {
     }
     else
         qDebug() << "Erreur de connexion";
+    db.close();
+    }
+    QSqlDatabase::removeDatabase("qt_sql_default_connection");
 }
 
 void Frame::getAllContacts() {
